@@ -62,6 +62,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: "codepush-prodml"
-          slot-name: "Production"
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_PRODUCTION }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_PROD }}
