@@ -18,10 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
+      - name: Setup Node.js using .nvmrc
         uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version-file: "custom/.nvmrc"
 
       - name: npm install, build, and test
         working-directory: ./api

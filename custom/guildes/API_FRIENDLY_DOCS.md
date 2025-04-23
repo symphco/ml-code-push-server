@@ -103,7 +103,9 @@ OAuth Apps are **essential** for your CodePush server deployment because:
 
 Without at least one OAuth provider configured, your CodePush server would have no way to authenticate users, making it impossible to use the system for deploying updates.
 
-### Setting Up a GitHub OAuth App
+### Setting Up a GitHub OAuth App (Recommended)
+
+GitHub OAuth is the recommended authentication method for CodePush Server. To set up:
 
 1. Go to https://github.com/settings/developers
 2. Click "New OAuth App"
@@ -115,7 +117,9 @@ Without at least one OAuth provider configured, your CodePush server would have 
 5. Generate a new Client Secret
 6. Save both values for your CodePush server configuration
 
-### Setting Up a Microsoft OAuth App
+### Setting Up a Microsoft OAuth App (Optional)
+
+Microsoft OAuth is optional and only needed if you want to support Microsoft account authentication:
 
 1. Register an app at https://portal.azure.com → Azure Active Directory → App registrations → New registration
 2. Name your application (e.g., "CodePush Server")
@@ -137,15 +141,15 @@ Without at least one OAuth provider configured, your CodePush server would have 
 Add to your `.env` file:
 
 ```
-# GitHub OAuth
+# GitHub OAuth (Required)
 GITHUB_CLIENT_ID=your_github_client_id
 GITHUB_CLIENT_SECRET=your_github_client_secret
 
-# Microsoft OAuth
-MICROSOFT_CLIENT_ID=your_microsoft_client_id
-MICROSOFT_CLIENT_SECRET=your_microsoft_client_secret
+# Microsoft OAuth (Optional)
+# MICROSOFT_CLIENT_ID=your_microsoft_client_id
+# MICROSOFT_CLIENT_SECRET=your_microsoft_client_secret
 # Only needed for single tenant work account setup
-MICROSOFT_TENANT_ID=your_tenant_id
+# MICROSOFT_TENANT_ID=your_tenant_id
 ```
 
 #### For Azure Deployment:
@@ -191,18 +195,16 @@ az deployment group create \
   --parameters project_suffix=<suffix> \
   az_location=eastus \
   github_client_id=<github-client-id> \
-  github_client_secret=<github-client-secret> \
-  microsoft_client_id=<microsoft-client-id> \
-  microsoft_client_secret=<microsoft-client-secret>
+  github_client_secret=<github-client-secret>
 ```
 
 Notes:
 
 - Choose a unique suffix (letters only, max 15 chars)
-- OAuth parameters are optional but recommended for authentication
-- **Important**: At least one OAuth provider (GitHub or Microsoft) must be configured for the system to work properly
-- If using Microsoft single tenant work accounts, you'll need to add the `MICROSOFT_TENANT_ID` parameter after deployment
+- GitHub OAuth parameters are required for authentication
+- Microsoft OAuth parameters (`microsoft_client_id`, `microsoft_client_secret`) are now optional and can be omitted if you're only using GitHub authentication
 - Your server URL will be: https://codepush-{suffix}.azurewebsites.net
+- First-time users will need to register with the CLI using `code-push-standalone register https://codepush-{suffix}.azurewebsites.net` before accessing the web interface
 
 ### Step 5: Manual Deployment to Azure Web App
 
@@ -268,9 +270,18 @@ If you want to monitor release activity via the CLI:
 ### Common Issues:
 
 1. **Deployment Fails**: Check that your project suffix meets naming requirements (letters only, max 15 chars)
-2. **Authentication Issues**: Verify OAuth callback URLs match your server URL exactly
-3. **Storage Errors**: Ensure Azurite is running for local development, or check storage account access keys
-4. **Node.js Version**: Make sure you're using Node.js 18 LTS as specified
+
+2. **GitHub Authentication Issues**:
+
+   - **Redirect URI Mismatch**: If you see an error about redirect_uri not being associated with the application, ensure your GitHub OAuth app's callback URL exactly matches what your server is using (including protocol, domain, and path)
+   - **Account Not Found Error**: If you see "Account not found. Have you registered with the CLI?" after GitHub authentication, you need to first register using the CLI with `code-push-standalone register <server-url>` before accessing the web interface
+   - **Authentication Failed**: Double-check your GitHub OAuth credentials are correctly set in environment variables
+
+3. **Microsoft Authentication Issues**: Verify that the redirect URIs and account types in your Microsoft application registration match your server configuration
+
+4. **Storage Errors**: Ensure Azurite is running for local development, or check storage account access keys
+
+5. **Node.js Version**: Make sure you're using Node.js 18 LTS as specified
 
 For more detailed troubleshooting, check the logs in your Azure Web App or local development environment.
 
@@ -347,9 +358,7 @@ az deployment group create \
   --parameters project_suffix="<your-suffix>" \
   az_location="eastus" \
   github_client_id="<github-client-id>" \
-  github_client_secret="<github-client-secret>" \
-  microsoft_client_id="<microsoft-client-id>" \
-  microsoft_client_secret="<microsoft-client-secret>"
+  github_client_secret="<github-client-secret>"
 
 # 5. Build the application for deployment
 npm run build
@@ -370,14 +379,17 @@ az webapp deployment source config-zip \
 # Install the CodePush CLI
 npm install -g code-push-cli
 
-# Login to your CodePush server
-code-push login --serverUrl https://codepush-<your-suffix>.azurewebsites.net
+# First-time users must register (creates your account)
+code-push-standalone register https://codepush-<your-suffix>.azurewebsites.net
+
+# For subsequent logins
+code-push-standalone login --serverUrl https://codepush-<your-suffix>.azurewebsites.net
 
 # Register your app
-code-push app add <app-name> <platform>
+code-push-standalone app add <app-name> <platform>
 
 # Deploy an update
-code-push release-react <app-name> <platform> --development
+code-push-standalone release-react <app-name> <platform> --development
 ```
 
-Remember to replace placeholder values (`<your-suffix>`, `<subscription-id>`, etc.) with your actual values. Also, make sure you have set up at least one OAuth provider (GitHub or Microsoft) before deployment.
+Remember to replace placeholder values (`<your-suffix>`, `<subscription-id>`, etc.) with your actual values. Also, make sure you have set up GitHub OAuth authentication before deployment.
