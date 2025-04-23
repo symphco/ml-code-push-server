@@ -4,6 +4,8 @@ This guide explains how to use the local CodePush CLI with your self-hosted Code
 
 ## Installation
 
+### Basic Installation
+
 To install and use the local CodePush CLI:
 
 ```bash
@@ -20,10 +22,75 @@ npm install
 npm run build
 
 # Install CLI globally
-npm install -g
+npm install -g ./cli
 ```
 
 After installation, the CLI will be available as `code-push-standalone`.
+
+### Shell Configuration
+
+Depending on your system setup, you may need to ensure the global npm binary directory is in your PATH:
+
+#### For zsh users (macOS default):
+
+1. Find your npm global binary location:
+   ```bash
+   npm config get prefix
+   ```
+
+2. Add the npm bin directory to your PATH by editing your `~/.zshrc` file:
+   ```bash
+   echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.zshrc
+   source ~/.zshrc
+   ```
+
+#### For bash users:
+
+1. Add to your `~/.bashrc` or `~/.bash_profile`:
+   ```bash
+   echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+#### For nvm users:
+
+If you're using Node Version Manager (nvm), ensure nvm's initialization is in your shell profile:
+```bash
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Verification
+
+To verify installation was successful:
+
+```bash
+code-push-standalone --version
+```
+
+This should display the CLI version number.
+
+### Troubleshooting Installation
+
+If `code-push-standalone` is not found after installation:
+
+1. Check the actual location of the binary:
+   ```bash
+   find $(npm config get prefix) -name code-push-standalone
+   ```
+
+2. Create a symlink to a directory already in your PATH:
+   ```bash
+   sudo ln -s "$(npm config get prefix)/bin/code-push-standalone" /usr/local/bin/code-push-standalone
+   ```
+
+3. Run with the full path until your PATH is configured:
+   ```bash
+   $(npm config get prefix)/bin/code-push-standalone
+   ```
+
+4. If using a package manager (like Homebrew on macOS), ensure your PATH priority is correctly set.
 
 ## Configuration
 
