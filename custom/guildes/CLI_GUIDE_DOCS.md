@@ -4,6 +4,8 @@ This guide explains how to use the local CodePush CLI with your self-hosted Code
 
 ## Installation
 
+### Basic Installation
+
 To install and use the local CodePush CLI:
 
 ```bash
@@ -20,10 +22,75 @@ npm install
 npm run build
 
 # Install CLI globally
-npm install -g
+npm install -g ./cli
 ```
 
 After installation, the CLI will be available as `code-push-standalone`.
+
+### Shell Configuration
+
+Depending on your system setup, you may need to ensure the global npm binary directory is in your PATH:
+
+#### For zsh users (macOS default):
+
+1. Find your npm global binary location:
+   ```bash
+   npm config get prefix
+   ```
+
+2. Add the npm bin directory to your PATH by editing your `~/.zshrc` file:
+   ```bash
+   echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.zshrc
+   source ~/.zshrc
+   ```
+
+#### For bash users:
+
+1. Add to your `~/.bashrc` or `~/.bash_profile`:
+   ```bash
+   echo 'export PATH="$(npm config get prefix)/bin:$PATH"' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+#### For nvm users:
+
+If you're using Node Version Manager (nvm), ensure nvm's initialization is in your shell profile:
+```bash
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Verification
+
+To verify installation was successful:
+
+```bash
+code-push-standalone --version
+```
+
+This should display the CLI version number.
+
+### Troubleshooting Installation
+
+If `code-push-standalone` is not found after installation:
+
+1. Check the actual location of the binary:
+   ```bash
+   find $(npm config get prefix) -name code-push-standalone
+   ```
+
+2. Create a symlink to a directory already in your PATH:
+   ```bash
+   sudo ln -s "$(npm config get prefix)/bin/code-push-standalone" /usr/local/bin/code-push-standalone
+   ```
+
+3. Run with the full path until your PATH is configured:
+   ```bash
+   $(npm config get prefix)/bin/code-push-standalone
+   ```
+
+4. If using a package manager (like Homebrew on macOS), ensure your PATH priority is correctly set.
 
 ## Configuration
 
@@ -61,8 +128,8 @@ code-push-standalone logout
 code-push-standalone app ls
 
 # Add a new app (create separate apps for iOS and Android)
-code-push-standalone app add MyApp-iOS
-code-push-standalone app add MyApp-Android
+code-push-standalone app add MCash-iOS
+code-push-standalone app add MCash-Android
 
 # Rename an app
 code-push-standalone app rename CurrentName NewName
@@ -77,16 +144,16 @@ Every app automatically gets "Staging" and "Production" deployments, but you can
 
 ```bash
 # List deployments for an app
-code-push-standalone deployment ls MyApp-iOS
+code-push-standalone deployment ls MCash-iOS
 
 # Add a deployment
-code-push-standalone deployment add MyApp-iOS QA
+code-push-standalone deployment add MCash-iOS QA
 
 # Rename a deployment
-code-push-standalone deployment rename MyApp-iOS QA Beta
+code-push-standalone deployment rename MCash-iOS QA Beta
 
 # Remove a deployment
-code-push-standalone deployment rm MyApp-iOS QA
+code-push-standalone deployment rm MCash-iOS QA
 ```
 
 ### Releasing Updates
@@ -95,7 +162,7 @@ code-push-standalone deployment rm MyApp-iOS QA
 
 ```bash
 # Release an update
-code-push-standalone release MyApp-iOS ./updates 1.0.0
+code-push-standalone release MCash-iOS ./updates 1.0.0
 ```
 
 Parameters:
@@ -116,7 +183,7 @@ Optional flags:
 
 ```bash
 # Release a React Native update
-code-push-standalone release-react MyApp-iOS ios
+code-push-standalone release-react MCash-iOS ios
 ```
 
 Parameters:
@@ -164,13 +231,13 @@ This example:
 
 ```bash
 # View release history
-code-push-standalone deployment history MyApp-iOS Staging
+code-push-standalone deployment history MCash-iOS Staging
 
 # Promote a release from Staging to Production
-code-push-standalone promote MyApp-iOS Staging Production
+code-push-standalone promote MCash-iOS Staging Production
 
 # Rollback a deployment to a previous release
-code-push-standalone rollback MyApp-iOS Production
+code-push-standalone rollback MCash-iOS Production
 ```
 
 ## Debugging
@@ -185,13 +252,13 @@ code-push-standalone debug ios
 
 ```bash
 # List collaborators
-code-push-standalone collaborator ls MyApp-iOS
+code-push-standalone collaborator ls MCash-iOS
 
 # Add a collaborator
-code-push-standalone collaborator add MyApp-iOS user@example.com
+code-push-standalone collaborator add MCash-iOS user@example.com
 
 # Remove a collaborator
-code-push-standalone collaborator rm MyApp-iOS user@example.com
+code-push-standalone collaborator rm MCash-iOS user@example.com
 ```
 
 ## Additional Security with Code Signing
@@ -200,7 +267,7 @@ If using code signing:
 
 ```bash
 # Release with a private key for signing
-code-push-standalone release-react MyApp-iOS ios --privateKeyPath private.pem
+code-push-standalone release-react MCash-iOS ios --privateKeyPath private.pem
 ```
 
 ## Example Workflow
